@@ -1,0 +1,16 @@
+Building fakeroot-ng is fairly straight forward. Generally, it follows the
+standard path of configure, make, make install. Packagers are highly advised
+to use the --with-memdir configure option to direct the temporary files
+creation to a directory that is guaranteed to be mounted on a ram disk.
+
+Fakeroot-ng is perfectly fine installed on the same system as fakeroot. At
+least on Debian derived systems, fakeroot installs itself through the
+alternatives system, so you can use it to pick whether to run the sysv or tcp
+versions. Since the basic command line is the same for fakeroot and fakeroot-ng
+it is possible to use that system to give the user the option to use
+fakeroot-ng when running plain "fakeroot". For most cases, that will work as
+is.
+
+Please note that the only platforms supported by fakeroot-ng at the moment are
+x86_64, i386 and ppc (32 bit only). Further platform support is conditioned on
+the developer getting access to such a platform.

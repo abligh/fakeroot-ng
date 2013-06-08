@@ -1,0 +1,45 @@
+
+libarch.a: $(libarch_a_OBJECTS) $(libarch_a_DEPENDENCIES)
+	$(AR) cru $@.tmp $(libarch_a_OBJECTS)
+	$(RANLIB) $@.tmp
+	mv $@.tmp $@
+
+@SET_MAKE@
+
+VPATH=$(top_srcdir)/arch/$(target_os)/$(target_cpu)
+
+CC = @CC@
+CCLD = $(CC)
+DEFS = @DEFS@
+CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+DEFAULT_INCLUDES = -I$(top_builddir) -I$(top_srcdir)/arch -I$(top_srcdir)/arch/$(target_os)/$(target_cpu)
+DEPDIR = @DEPDIR@
+RANLIB = @RANLIB@
+target_cpu = @target_cpu@
+target_os = @target_os@
+
+# Because we are extracted by configure one directory above the one from which we are included,
+# manually add a "directory up"
+top_builddir = ../@top_builddir@
+top_srcdir = ../@top_srcdir@
+
+%.lo: %.c $(DEPDIR)/stamp
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) \
+		-MT $@ -MD -MP -MF $(DEPDIR)/$(notdir $*.Tdep) -c -o $@ $<
+	mv -f $(DEPDIR)/$(notdir $*.Tdep) $(DEPDIR)/$(notdir $*.dep)
+
+$(DEPDIR)/stamp:
+	mkdir -p $(DEPDIR)
+	touch $(DEPDIR)/stamp
+
+include $(wildcard $(DEPDIR)/*.Pdep)
+
+.PHONY: clean distclean
+
+distclean: clean
+	$(RM) Makefile
+	$(RM) ../Makefile.template
+
+clean:
+	$(RM) -r .deps .libs *.o *.lo ../*.o ../*.lo core libarch.a

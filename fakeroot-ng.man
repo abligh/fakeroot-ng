@@ -1,0 +1,111 @@
+.TH FAKEROOT\-NG 1 "April 1, 2013" "Shachar Shemesh" "Fakeroot Next Gen User Manual"
+.\" Please adjust this date whenever revising the manpage.
+.SH NAME
+fakeroot\-ng \- run a command while making it believe it is running as root
+.SH SYNOPSIS
+\fBfakeroot\-ng\fP [ \fB\-l\fIlogfile\fP [\fB\-f\fP] ] [ \fB\-p\fIpersist_file\fP ] [\-d] \fIcommand line\fP
+.SH DESCRIPTION
+This manual page documents the \fBfakeroot\-ng\fP command.
+.PP
+Fakeroot\-ng allows running a process without any change to the permissions, but fooling the
+process into thinking that it is running with root permissions. This typically involves
+intercepting certain system calls the process performs and manipulating their results. In order
+for the effect to be complete enough, previous manipulations have to be remembered, and
+consistent results returned.
+.PP
+The idea behind fakroot\-ng was first implemented by a tool called fakeroot(1). This tool used
+LD_PRELOAD of the dynamic linking to glibc in order to intercept the system calls. While this
+approach is very rebust and very platform independent, it does suffer in scope. In particular,
+certain operations (mostly the open(2) system call) could not be intercepted, which caused
+emulating other operations (mainly the chroot(2) system call) to not be supported.
+.PP
+Fakeroot\-ng strives to fill those gaps by using a totally different technology for system call
+interception. Instead of using LD_PRELOAD, ptrace(2) is being used.
+.SH PARAMETERS
+.TP
+\fB\-p\fIstate_file\fP
+Before the first process is being run, loads from \fIstate_file\fP the
+information needed in order to maintain a consistent view of file permissions and owners across
+fakeroot\-ng runs. This image is also automatically saved when the last process exists. If more then
+one instance of fakeroot\-ng is loaded simultaneously, both with the same \fIstate_file\fP, then
+the two instances will share state and their processes will see the same picture at runtime.
+.TP
+\fB\-l\fIlog_file\fP
+Causes fakeroot\-ng to dump to \fIlog_file\fP internal state and processing information. This is
+mostly useful for cases where fakeroot\-ng fails to act as expected.
+.TP
+\fB-f\fP
+Causes the log file to be flushed after every print. Guarantees that the important hint as to why
+the crash happened will be in the actual file, but has non-negligent performance effect. Only has
+effect if \fB\-l\fP is specified.
+.TP
+\fB\-d\fP
+Tells fakeroot\-ng not to completely daemonize itself. This is mostly useful in case of crashes that
+cause a core dump, as the debugger would normally change directory to root, which would prevent a
+core file from being created.
+.TP
+\fB\-v\fP
+Print out the version number and copyright info and exit without doing anything.
+.TP
+\fB\-h\fP
+Print out a short help screen and exit.
+.SH SIGNALS
+Sending the ALRM signal to the fakeroot\-ng master process makes it dump to the log a complete
+list of all tracked processes, along with their parent and current state. This is, mostly, a
+debugging feature. The signal does nothing if \fB\-l\fP is not active. Please note that no
+process executes any system calls while this takes place, so this feature essentially freezes
+all of the debugged processes for a few seconds.
+.SH ENVIRONMENT VARIABLES AND SHARED MEMORY
+Some of the communication between fakeroot\-ng and the program being fooled is done through a
+shared memory mechanism. In order to create it, fakeroot\-ng creates a temporary file and maps
+it into memory as executable segment. Some systems have their /tmp folder mounted with the
+\fBnoexec\fP flag. On those system, the mmap will fail and fakeroot\-ng will not run.
+
+There are two environment variables that allow fakeroot\-ng to find a folder in which the
+shared memory files can be created. The first is \fBTMPDIR\fP. If it exists, fakeroot\-ng will
+use it to create the temporary files, rather than /tmp. The problem with using \fBTMPDIR\fP
+for creating temporary files is that fakeroot\-ng is not the only one to use it. For that reason,
+if the environment has a variable called \fBFAEKROOT_TMPDIR\fP, its value will override that
+of either \fBTMPDIR\fP or the default /tmp directory.
+
+On Linux, it is usually entirely safe to point \fBFAKEROOT_TMPDIR\fP to \fB/dev/shm\fP, which
+usually lives up to expectations regarding mount mode and writability.
+.SH SECURITY CONSIDERATIONS
+Fakeroot\-ng is a non-SUID executable, and does not modify any sensitive data. It, therefor,
+does not affect the overall security of the system. One may be tempted, however, to use
+fakeroot\-ng as a security tool, for running processes with reduced privileges or inside
+a chroot jail. In addition to all the warnings that usually apply to using chroot jails as a security
+tool (in a nutshell - don't), the following should be understood.
+.PP
+Unlike previous implementations, fakeroot\-ng uses a technology that leaves the traced process
+no choice regarding whether it will use fakeroot\-ng's "services" or not. Compiling a program
+statically, directly calling the kernel and manipulating ones own address space are all techniques
+that can be trivially used to bypass LD_PRELOAD based control over a process, and do not apply
+to fakeroot\-ng. It is, theoretically, possible to mold fakeroot\-ng in such a way as to have total
+control over the traced process.
+.PP
+While it is theoretically possible, it has not been done. Fakeroot\-ng does assume certain "nicely
+behaved" assumptions about the process being traced, and a process that break those assumptions
+may be able to, if not totally escape then at least circumvent some of the "fake" environment
+imposed on it by fakeroot\-ng. As such, you are strongly warned against using fakeroot\-ng as
+a security tool. Bug reports that claim that a process can deliberatly (as opposed to inadvertly) 
+escape fakeroot\-ng's control will either be closed as "not a bug" or marked as low priority.
+.PP
+It is possible that this policy be rethought in the future. For the time being, however, you have
+been warned.
+.SH BUGS
+Plenty of those. See the "README" file for a list of known ones.
+.SH SEE ALSO
+.BR fakeroot "(1), " fakechroot "(1), " ptrace "(2), " ld.so "(8), " chroot (1)
+.SH AUTHOR
+Fakeroot\-ng was written by Shachar Shemesh.
+.PP
+This manual page was written by Shachar Shemesh <shachar@debian.org>
+.SH PROJECT HOMEPAGE AND SUPPORT
+http://fakeroot-ng.lingnu.com
+.PP
+Community support is available exclusively through the project's
+mailing list, at https://lists.sourceforge.net/lists/listinfo/fakerootng\-devel.
+.PP
+Commercial support is available through Shachar's company,
+Lingnu Open Source Consulting Ltd., at http://www.lingnu.com

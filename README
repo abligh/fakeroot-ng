@@ -1,0 +1,39 @@
+When building fakeroot-ng, it is recommended that the --with-memdir
+configure option be used to direct the shared memory files into a directory
+that resides on a tmpfs file system. On Debian systems, this is typically the
+/dev/shm directory. Care must be taken, however, that this directory not reside
+on a file system that is mounted with the noexec flag, or fakeroot-ng will not
+be able to function properly.
+
+This file lists bugs and limitations of fakeroot-ng. There are three lists:
+SCOPE - areas that are left, on purpose, outside the scope
+TODO - lists action items that are simply not yet implemented
+BUGS - lists functions that are implemented, but have known limitations that
+will be addressed soonish
+LIMITATIONS - lists limitations either inherent to the technology, or that
+are outside the scope of coverage intended in the foreseeable future.
+
+SCOPE
+- When switching users, file permissions do not mimic the real system. For
+  files created as part of the fake root environment, all access is "root"
+  access, regardless of the file's true permissions.
+
+TODO
+- Wider support for "old" syscalls (16 bit getuid, 32bit stat etc.)
+- Multithreaded debugger
+- Redirect opens of "character devices" to real device with same major/minor.
+- In chroot, the actual interpreter file (ld-linux for ELF executable) is
+  searched for in the real root, rather than in the chrooted jail.
+
+BUGS
+- The "wait" type syscalls are only emulated enough to allow two specific
+  debuggers to run: fakeroot-ng and strace
+- Poor handling of multithreaded programs - mostly solved
+- Poor handling of 32 bit programs on X86_64
+- Files created inside SGID directories do not inherit their gid from the
+  directory.
+
+LIMITATIONS
+- Program has limited access to the fakeroot-ng controlled memory inside the
+  program's address space
+

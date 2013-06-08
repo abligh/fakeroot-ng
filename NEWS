@@ -1,0 +1,37 @@
+As of version 0.18, a persistent daemon will hang around for a few seconds
+after the last client has exit, in case a new client comes along for the same
+database. This makes the performance penalty for using repeated fakeroot-ng
+commands in a script much lower.
+
+The following is now both safe and has reasonable performance:
+#!/bin/sh -e
+fakeroot-ng command1
+fakeroot-ng command2
+fakeroot-ng command3
+fakeroot-ng command4
+
+As of version 0.15, fakeroot-ng makes sure that it has complete access
+to files and directories it creates, even if they "have" no uid read
+permission.
+
+Fakeroot-ng now supports running two independent instances using the same
+state file, and have the fake image both instances see be synchronized.
+
+As of version 0.10, fakeroot-ng now supports the "chroot" system call. Once
+called, a process will be restriced to a subtree of the entire file system.
+This applies to almost all system calls.
+
+System calls this does not apply to include some old system calls. Also, when
+an ELF executable (any Linux executable nowadays, for example) is loaded using
+execve, the kernel analyzes it to see where the dynamic linker resides. usually
+it is /lib/ld-linux.so.2. Since the kernel is the one doing this analysis,
+this file is not affected by a chroot.
+
+Unfortunately, this is not a trivial problem. ld-linux.so.2 and glibc are very
+tightly coupled, and it is not possible to combine them across versions. As a
+result, an attempt, for example, to chroot from a Debian Sid machine into a
+Debian Sarge chroot will fail with the following error message:
+/bin/bash: relocation error: /lib/tls/libc.so.6: symbol _dl_starting_up, version GLIBC_PRIVATE not defined in file ld-linux.so.2 with link time reference
+
+This is a result of ld-linux from Sid trying to load glibc from Sarge. A
+solution is being worked on.

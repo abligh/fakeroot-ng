@@ -1,0 +1,116 @@
+Version 0.18
+    * Fix a problem with fchmodat
+    * Fix a race in case of new client attaching just as the daemon is
+      shutting down.    
+    * Rennovate the entire startup sequence.
+    * Resolve the threading problem
+    * Solve crash when run without a persitent state file
+    * Performance changes
+    * Update the home page
+    * Add packaging tips in the README and README.packaging files
+    * Add -h help command line option
+
+Version 0.17
+    * Allow setting the process credentials to things other than root
+
+Version 0.16
+    * Sending an ALRM signal to the fakeroot-ng process dumps to the log all
+      tracked processes, along with their state
+    * Add -f option - flush log after every print
+    * Greater support for platforms that have no automatic new process attach
+      mechanisms. Will now detect children through the clone return code.
+    * Improve the ptrace emulation layer - will now attach fake debugger to
+      child correctly.
+    * Fix to the PTRACE_DETACH emulation - would not restart the process from
+      which we detached.
+
+Version 0.15
+    * mkdirat would not put the directory into the lie database
+    * When running chmod and when creating files and directories - do not
+      allow the user to actually remove the permission for user - emulates the
+      root behavior of allowing access to a file regardless of its actual
+      permission.
+    * Fix bug - when importing existing file's permission into the lie database,
+      we used to copy the file's real uid into the fake gid.
+
+Version 0.14
+    * Fix bug in unlinkat - context data used in incorrect order, resulting in
+      "Not a directory" error when deleting a file.
+    * Remove configure command line to get format string protection to dlog
+    * Solve all dlog format string warnings
+    * Fix bug in distclean - would not remomve generated template makfile from
+      arch/linux directory
+    * The -p option will now connect to an existing debugger, if one exists.
+    * Allow use of FAKEROOT_TMPDIR as well as TMPDIR for setting the location
+      of the temporary files
+    * Allow changing the default shared mem directory from /tmp via a
+      configure command option (--with-memdir)
+
+Version 0.13
+    * Remove libtool from the ptlib build system. Make the actual build
+      faster. Suggested by Bernhard R. Link
+    * Add checks to make sure that fakeroot-ng will warn of a temporary
+      directory that is mounted with "noexec"
+    * Running "fakeroot-ng" with no arguments will run the current shell as
+      "root"
+
+Version 0.12
+    * Complete the chroot support for all *at functions
+
+Version 0.11
+    * Fix compilation error
+    * Resolve uninitialized buffer reliance for fork and vfork
+
+Version 0.10
+    * Implement set_string for copying a string into process space
+    * Prevent the debugged process from sending a signal to the debugger
+    * Chroot support (all but the *at functions)
+
+Version 0.09
+    * Read and writes to process memory can now be performed in any length
+      and/or alignment
+    * As a result - recursive debugger now works for x86_64 (only for 64bit)
+
+Version 0.08
+    * Many many many code cleanups
+    * New platform (partially) supported - Linux/x86_64:
+      * Supported - basic running
+      * Not supported (well) - recursive debuggers, 32 bit programs
+    * Really fix the "openat" issue this time
+    * Add a program "calc_defaults" that attempts to detect values for a new
+      platform's platform_specific.h
+    * Write a new platform porting HOWTO
+
+Version 0.07
+    * Fix compilation errors on platforms that don't or partially support
+      "openat"
+
+Version 0.06
+    * Fix bug with mknod implementation - would save state too late
+    * Fix incorrect use of hyphen as minus in the man page
+    * Add support for fchownat, fchmodat, mknodat, openat, mkdirat, symlinkat
+
+Version 0.05
+    * Add recursive debugger support - mainly strace at the moment
+
+Version 0.04
+    * Add a PowerPC port
+
+Version 0.03
+    * Add storing persistent state between runs
+    * Several bug fixes
+
+Version 0.02
+    * New functions supported: chown, getgid/getegid, mknod (creating device
+      files)
+    * Assume ownership to root when creating files, directories and symbolic
+      links
+    * Improve some "stat" handling semantics
+    * Slight change to the command line parameters
+    * Internal restructuring and code cleanup
+    * Entire emulation of all basic operations (a few know bugs for fringe
+      cases).
+
+Version 0.01
+    * Initial release. Supports Linux/i386 only. Only supports {,f,l}stat64,
+      (f)chmod and get(e)uid.

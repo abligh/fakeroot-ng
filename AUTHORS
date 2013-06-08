@@ -1,0 +1,51 @@
+fakeroot-ng is copyright (c) 2007-2009,2013 by Shachar Shemesh
+
+Project's home page is at http://fakeroot-ng.lingnu.com
+
+Special thanks goes to Bernhard R. Link for insisting that things be better
+than "good enough".
+
+Thanks should also go to Tyler Larson, for saying "I need this fixed, so I'll
+pay for your time". The true open source model at work.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+Contact Shachar at shachar@debian.org. Commercial support is available through
+Shachar's company, Lingnu Open Source Consulting Ltd. http://www.lingnu.com
+
+If I have seen further it is by standing on the shoulders of Giants.
+        Sir Izik Newton
+        Himself quoting the great men of the renaissance
+
+Fakeroot Next Generation was written by Shachar Shemesh, in his spare time
+(such that there is). Fakeroot NextGen is a clean reimplementation, and no code
+was taken from previous implementations. It is based on a completely different
+technology, and therefor does not suffer from the other implementations
+limitations (but probably has its own unique ones).
+
+The idea behind fakeroot ng has been around long before it came around. The
+first implementation, as far as we could find, is called "fakeroot". It can be
+found at http://alioth.debian.org/projects/fakeroot/. It lists Joost Witteveen,
+Clint Adams and Timo Savola as the authors. Its functionality, as well as its
+limitations, have been the inspiration that brought fakeroot-ng to be.
+
+The original fakeroot's limitations were also the trigger that brought another
+project about. Called "fakechroot", written by Piotr Roszatycki, home dir at
+http://fakechroot.alioth.debian.org/, it attempts to overcome one of fakeroot's
+main limitation - its inability to catch the open(2) system call, and therefor
+its inability to emulate the "chroot" environment. It does not, however, change
+the core technology used, and therefor has limitations over how complete the
+environment is. It is hoped that as fakeroot-ng progresses, we can eliminate
+all of the limitations.

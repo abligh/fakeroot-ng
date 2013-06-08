@@ -1,0 +1,221 @@
+This document lists the steps required to port fakeroot-ng to a new platform.
+
+SHORT INSTRUCTIONS
+- Create a directory called arch/<os name>/<hw platform>/
+- Create a file called arch/<os name>/<hw platform>/platform_specific.h. It
+    needs to define all the constants defined by arch/linux/i386 as well as
+    the ptlib_stat structure.
+- Implement all functions declared in arch/platform.h
+- Make sure that Makefile.in translates into a makefile that builds the library
+
+Simplicity at its best!
+
+
+
+LONG INSTRUCTIONS
+
+Welcome porter.
+
+Fakeroot-ng is a ptrace based syscall interceptor/emulator. As such, it has
+some characteristics usually only found inside a kernel (see the sys_wait4
+impelementation).
+
+Most such characteristics are inside the main code, and are aimed to be done in
+a platform independent way. Some things are, unavoidably, done on a
+per-platform basis.  In order to reduce the use of in code #ifdefs, every
+attempt was made to isolate the platform dependent functions into a library
+called "ptlib". It is built inside the arch/<os>/<cpu> directory.
+
+You job, should you choose to accept it, is to implement ptlib for a new
+platform.
+
+INITIAL SUPPORT
+Probably the first step in implementing support for a new platform is to create
+a build environment for the platform. This is done by adding the arch/os/cpu
+directory to the source control. When "configure" is run, it detects the TARGET
+platform, and the rest of the build system looks there for the ptlib
+implementation.
+
+Sometimes, several platforms share the same ptlib implementation. For example,
+we don't care which 32 bit Intel/AMD CPU is running our code. Be it oldest
+386 or newest Opetron, we intercept the syscalls the same way and use,
+basically, the same kernel. As such, autoconf platform detection is a done with
+too much granularity for our taste. To compensate for that, configure.ac has
+code to turn the i486, i586 etc. CPUs to "i386". If your platform also has
+several names that are, essentially, identical, feel free to copy this code.
+
+Please note that the above does not apply if you need to support two platforms
+at once (say, a 64 bit platform that is able to run 32 bit executables).
+Typically that requires syscall translation. That case is explained further
+down.
+
+Once the directory is created, you will need to create a file called
+"platform_support.h" inside it. This file is automatically included by the main
+ptlib include file, and any definition done here is visible throughout the
+project. Some definitions are mandatory, and those will be covered in the next
+section.
+
+PLATFORM_SPECIFIC.H
+This file should define constants used throughout the rest of the project. Its
+content range from defining kernel structures to specifying runtime behavior.
+
+Please note that while it is possible to test for the behavior using a test
+program, fakeroot-ng does not do so as part of the configure script. The reason
+is that those tests require a runtime environment, which means they cannot be
+performed on a cross-compiler environment. Instead, the tests directory
+contains a program called "calc_defaults". It attempts to give suggestions as
+to what should be the right values for platform_specific.h.
+
+The first part of the include file are the includes. You will need to add here
+whatever includes are necessary to expose the data types the program will need.
+The most obvious includes that need to go here are the includes that will
+define the syscall numbers with the SYS_ extension. For example, under Linux on
+i386, the "read" system call is number 3. On Linux on the X86_64 (aka amd64) it
+is number 0. Either way, SYS_read needs to resolve to the right number, and the
+includes in platform_specific.h need to make that happen. Under Linux, this is
+as simple as including <sys/syscall.h>.
+
+The next part is a set of preprocessor definitions that determine what
+capabilities ptlib supports. It does not matter whether the system supports
+those capabilities by default, or even if they are natively supported. All that
+matters is whether ptlib can give the impression that they are supported.
+
+These are the macros, and their meaning:
+PTLIB_SUPPORTS_FORK/VFORK/CLONE - ptlib is able to set up the system so that it
+automatically continues to trace both parent and child after a call to fork/
+vfork/clone respectively. If that is not the case, some magic using trampuline
+code is required.
+
+PTLIB_PARENT_CAN_WAIT - if this value is 1, on this platform a parent that
+calls "wait" to collect a child that is also being debugged by another process
+will receive the exit status. Implicit to this macro is that if the parent does
+not call "wait" then the child will remain a zombie, even if the debugger did
+call wait for it. On some platforms, when a process debuggs another, the
+original parent siezes to function as one. Those platforms should set this
+value to zero.
+
+PTLIB_STATE_SIZE - how many PTLIB_LONGs are required to completely save the
+state of the process, so we can resume it to the same position. Fakeroot-ng
+will save that much memory for each process for those cases where it is
+necessary to freeze a process' state, do some processing on it, and then
+restore it to the original state.
+
+PTLIB_TRAP_AFTER_EXEC - on some platforms, if a process is being traced, the
+system sends it a SIGTRAP after a successful execve. This has the effect of
+notifying the debugger that the process performed an execve, even if it was
+not in PTRACE_SYSCALL mode.
+
+In addition to the binary defines, we also need to define several helpers:
+PID_F - the printf format specifier for printing pids
+DEV_F - the printf format specifier for printing dev_t
+INODE_F - the printf format specifier for printing inode_t (inodes)
+
+PREF_NOP - sometime we want to cancel a system call altogether. This is,
+typically, impossible. Instead, we translate the syscall into another syscall
+that has no effect and takes little time. getuid is usually a good choice.
+
+PREF_STAT/LSTAT,FSTAT,FSTATAT - the preferred syscall for performing stat/lstat
+and the rest of the stat functions. These functions should be able to cover the
+entire range of inodes.
+
+ptlib_stat - either a typedef or an explicit struct definition (usually the
+later) for the data format with which data is passed fromt the kernel when
+using the various PREF_STAT syscalls. Notice that, due to the fact that some
+of the members of the standard stat structure are actually preprocessor macros,
+the members have been renamed from their usual names. In particular, we drop
+the st_ prefix. At the very least the struct should define the following
+members: dev, ino (for the inode), mode, nlink, uid, gid, rdev and {a,m,c}time.
+
+ACTUAL PTLIB IMPLEMENTATION
+If you are merely adding support for a new Linux platform, have a look at the
+functions already defined in arch/linux/os.c. If you find that these
+implementations do the job, all you have to do is to place an implementation of
+the relelvant function that redirects to the function in os.c.
+
+The first thing you need to know about your platform is how syscalls are done,
+how parameters are passed to the kernel, how the results are returned, and how
+error conditions are being signalled and error codes passed.
+
+Personally, I found that the best way to get that information is to compile
+statically a tiny program that merely performs a system call, and then look at
+the resulting assembly. "mmap" is a good function to test, because it has the
+most arguments from all Linux (and possibly Posix) system calls. Then again, it
+has so many arguments that, for example, Linux/i386 treats it differently than
+it does other system calls. There really is no "one method" to find this out.
+
+Another good place to look is inside the glibc (or whatever runtime library
+your platform uses) source code, if you have it. Even if you don't, a
+disassembly can teach you a lot about the interface.
+
+Keep in mind that the differences can be major. For example, the Linux/i386
+platform indicates an error by returning a negative value (which glibc then
+makes positive and places in errno). Linux/ppc, on the other hand, indicates
+an error by turning on a condition flag, and errno is returned as the positive
+return code. Every attempt was made to make ptlib flexible enough to support it
+all, but if you find the interface lacking, please feel free to bring it up on
+the mailing list.
+
+DEBUGGED PROCESS STATE
+The case may be that your platform requires knowing something about the
+debugged process' state before finding out information about it. For example,
+on Linux/x86_64 it is necessary to know whether the debugged process is running
+as a 64 or a 32 bit process.
+
+Fakeroot-ng is set up as to allow ptlib to find this information once, and then
+cache it so long as it is not possible to change. The key is the ptlib_continue
+function. As long as it has not been called, the process has not be resumed,
+and any state information collected about it is still valid.
+
+SEVERAL ARCHITECTURES IN ONE
+Some hardware platforms have several possible architectures rolled into one. It
+may be a 32/64 bit subsystem with different register allocations and system
+call numbers, it may be a compatibility ABI mechanism that allows running
+programs written for another OS, or it may be something crazier still.
+
+As long as ptlib can export a coherent view of what the state is, it should
+strive to do so. If a system call can pass parameters in four different methods
+then ptlib should handle all four, and still have ptlib_get_argument return the
+right value. Some cases, however, are more difficult to maintain.
+
+In particular, it may be that the different architectures assign different
+system call numbers to the same system calls. The following is just a
+suggestion on how to handle that case:
+
+Make up your mind what is the "main" interface to the kernel. Make sure that
+the info exported from ptlib is always in that main interface language. For
+32/64 bit platforms, this will likely be the 64 bit interface. For the rest
+of this discussion we'll assume that 64 bit is the main interface, and 32 bit
+the auxillary one.
+
+Create a table that translates all syscalls in the 32 bit architecture to the
+syscalls in the 64 bit one. This is required for handling the ptlib_get_syscall
+function. One way to create this table is to copy the syscalls definition from
+the 32 bit header (/usr/include/asm-i386/unistd.h) to an array. Since they are
+ordered, the array index will be the 32 bit syscall. Since the actual
+definitions come from the 64 bit environment, the data will be the 64 bit
+counterpart. The easiest way to create the reverse table is in runtime inside
+ptlib_init.
+
+The problem is that not all 32 bit syscalls even have 64 bit counter parts.
+Linux/i386 has two "getuid" functions (one 16 bit, one 32). Linux/x86_64 has
+just one (64 bit). This gets worse for the "stat" function. Linux/x86_64 has
+three (oldstat, stat and stat64, not including fstatat that has different
+parameters). Linux/x86_64 has just one. The actual structure passed to all
+four is different.
+
+"stat" is a special case, described later. For the rest of the functions, if
+fakeroot-ng does not need to handle this syscall, you can just assign is the
+value -1. Fakeroot-ng will pick it up and not handle the syscall. If
+fakeroot-ng does need to handle this syscall, you can just assign it a
+fictional syscall number. To avoid collision, the X86_64 implementation uses
+negative numbers (starting with -2, of course).
+
+TODO: Describe the "stat" special handling.
+
+REFERENCES
+The following places are interesting places to look for hints on how to deal
+with certain cases:
+- configure.ac for linux/i386 - cases where several HW platforms require the
+    same name (i386, i486, i586 etc.)
+- the implementation for linux/x86_64 - several different subsystems
+
