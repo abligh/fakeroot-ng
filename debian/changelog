@@ -1,0 +1,125 @@
+fakeroot-ng (0.16-1ubuntu1) precise; urgency=low
+
+  * Compile with -D_GNU_SOURCE (LP: #935085)
+
+ -- Andreas Moog <amoog@ubuntu.com>  Sat, 25 Feb 2012 18:07:01 +0100
+
+fakeroot-ng (0.16-1) unstable; urgency=low
+
+  * New upstream version (major bug fixes)
+  * fakeroot-ng should use /dev/shm for shared memory files (Closes:
+    #532994)
+
+ -- Shachar Shemesh <shachar@debian.org>  Tue, 23 Jun 2009 21:42:23 +0300
+
+fakeroot-ng (0.15-1) unstable; urgency=low
+
+  * New upstream version
+  * Fix "package description says chroot interception is not
+    implemented" - Package description updated (Closes: #521784)
+
+ -- Shachar Shemesh <shachar@debian.org>  Thu, 28 May 2009 14:46:43 +0000
+
+fakeroot-ng (0.14-1) unstable; urgency=low
+
+  * New upstream version
+  * Update the common licenses link to GPL version 2
+
+ -- Shachar Shemesh <shachar@debian.org>  Fri, 20 Feb 2009 21:48:32 +0000
+
+fakeroot-ng (0.12-3) unstable; urgency=low
+
+  * Fakeroot-ng silently fails when /tmp is mount noexec (Closes:
+    #495421)
+
+ -- Shachar Shemesh <shachar@debian.org>  Wed, 20 Aug 2008 11:43:51 +0000
+
+fakeroot-ng (0.12-2) unstable; urgency=high
+
+  * "fakeroot rm file" gives a weird rmdir error, breaks debhelper.
+    (Closes: #493061)
+  * debian/rules clean does not clean, resulting in FTBS twice problems
+    (Closes: #495174)
+  * Reduce use of continuation line in debian/postinst to work around a
+    lintian false positive (filed bug #495176)
+
+ -- Shachar Shemesh <shachar@debian.org>  Fri, 15 Aug 2008 05:32:36 +0000
+
+fakeroot-ng (0.12-1) unstable; urgency=low
+
+  * New upstream version
+  * Support for chroot for all Linux syscalls is now complete.
+
+ -- Shachar Shemesh <shachar@debian.org>  Wed, 11 Jun 2008 08:48:57 +0000
+
+fakeroot-ng (0.11-1) unstable; urgency=low
+
+  * New upstream version
+  * Fixes problem with vfork and fork
+
+ -- Shachar Shemesh <shachar@debian.org>  Mon, 09 Jun 2008 20:47:55 +0000
+
+fakeroot-ng (0.10-1) unstable; urgency=low
+
+  * New upstream version
+  * FTBFS with g++-4.3: Missing includes (Closes: #472564)
+  * Now has (limited) support for chroot
+
+ -- Shachar Shemesh <shachar@debian.org>  Mon, 09 Jun 2008 16:02:31 +0000
+
+fakeroot-ng (0.09-2) unstable; urgency=low
+
+  * FTBFS: arch/platform.h:17: error: 'pid_t' has not been declared
+    (Closes: #474793)
+  * Merge support for gcc 4.3 from upstream SVN
+
+ -- Shachar Shemesh <shachar@debian.org>  Sat, 12 Apr 2008 12:28:35 +0000
+
+fakeroot-ng (0.09-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fix FTBFS with gcc-4.3.  Patch from Arthur Loiret.  Closes: #472564. 
+
+ -- Mark Hymers <mhy@debian.org>  Sun, 06 Apr 2008 10:19:14 +0000
+
+fakeroot-ng (0.09-1) unstable; urgency=low
+
+  * New upstream release
+  * Now supports strace on AMD64 platform
+
+ -- Shachar Shemesh <shachar@debian.org>  Sat, 15 Mar 2008 15:21:55 +0200
+
+fakeroot-ng (0.08-1) unstable; urgency=low
+
+  * New upstream release
+  * New platform supported - AMD64 (Closes: #465042)
+  * New porting HOWTO for yet unsupported platforms
+
+ -- Shachar Shemesh <shachar@debian.org>  Wed, 20 Feb 2008 16:32:47 +0000
+
+fakeroot-ng (0.06-1) unstable; urgency=low
+
+  * New upstream release
+  * Support for all *at Linux syscalls (openat, fstatat etc.) (Closes: #463697)
+  * Much better strace support (still no -f support)
+
+ -- Shachar Shemesh <shachar@debian.org>  Wed, 06 Feb 2008 17:21:17 +0000
+
+fakeroot-ng (0.05-1) unstable; urgency=low
+
+  * New upstream release - add (slightly limited) support for strace inside
+    fakeroot
+
+ -- Shachar Shemesh <shachar@debian.org>  Thu, 31 Jan 2008 14:47:59 +0000
+
+fakeroot-ng (0.04-2) unstable; urgency=low
+
+  * Fix copyright file to list copyright holders (ftpmasters feedback)
+
+ -- Shachar Shemesh <shachar@debian.org>  Sat, 12 Jan 2008 20:08:06 +0000
+
+fakeroot-ng (0.04-1) unstable; urgency=low
+
+  * Initial release (Closes: #330670)
+
+ -- Shachar Shemesh <shachar@debian.org>  Tue, 08 Jan 2008 20:41:54 +0000

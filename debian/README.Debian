@@ -1,0 +1,8 @@
+fakeroot-ng for Debian
+----------------------
+
+Fakeroot-ng adds itself as a candidate for the "fakeroot" command. You can use
+"update-alternatives --config fakeroot" to make it the default when running
+fakeroot.
+
+ -- Shachar Shemesh <shachar@debian.org>  Tue, 08 Jan 2008 20:27:55 +0000

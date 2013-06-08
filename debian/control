@@ -1,0 +1,24 @@
+Source: fakeroot-ng
+Section: utils
+Priority: extra
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Shachar Shemesh <shachar@debian.org>
+Build-Depends: debhelper (>= 5), autotools-dev, linux-kernel-headers
+Standards-Version: 3.8.2.0
+
+Package: fakeroot-ng
+Architecture: i386 powerpc amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Homepage: http://sourceforge.net/projects/fakerootng
+Description: Gives a fake root environment
+ This is a clean reimplementation of the fakeroot command. Just like it,
+ anything run within the fake root command will assume it is running as root.
+ Unlike it, fakeroot-ng is not based on LD_PRELOAD but on ptrace.
+ .
+ The practical upshot of this is that the technology supports intercepting the
+ "open" system call. In particular, this allows simulating the "chroot" command
+ reliably.
+ .
+ Another important difference is that fakeroot-ng can fool applications that do
+ not perform system calls through glibc, such as statically linked executables
+ and programs written in some non-C languages (like the latest Sun JDK).
