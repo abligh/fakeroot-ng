@@ -1,0 +1,17 @@
+How to build on Ubuntu 12.04
+============================
+
+fakeroot-ng requires g++ 4.7 or better to compile. This is not available
+as stanard on Ubuntu Precise 12.04, even within backports. To compile,
+bring in the Raring tool chain.
+
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt-get update
+sudo apt-get install g++-4.7
+
+You do not need to update-alternatives (i.e. use the new tool chain by
+default) for this package to compile.
+
+The resultant .deb works fine on Precise without additional libraries.
+
+Alex Bligh
