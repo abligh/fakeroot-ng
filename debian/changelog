@@ -1,3 +1,11 @@
+fakeroot-ng (0.18-0) precise; urgency=low
+
+  * New upstream version 0.18
+  * Add Build-Depends for gcc 4.7
+  * Build with gcc 4.7
+
+ -- Andreas Moog <amoog@ubuntu.com>  Sat, 25 Feb 2012 18:07:01 +0100
+
 fakeroot-ng (0.16-1ubuntu1) precise; urgency=low
 
   * Compile with -D_GNU_SOURCE (LP: #935085)

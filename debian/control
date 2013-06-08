@@ -3,7 +3,7 @@ Section: utils
 Priority: extra
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Shachar Shemesh <shachar@debian.org>
-Build-Depends: debhelper (>= 5), autotools-dev, linux-kernel-headers
+Build-Depends: debhelper (>= 5), autotools-dev, linux-kernel-headers, g++-4.7
 Standards-Version: 3.8.2.0
 
 Package: fakeroot-ng
